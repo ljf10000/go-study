@@ -25,6 +25,128 @@ type IpEntry struct {
 }
 */
 
+const (
+	FieldIpMin           = 0
+	FieldIpMax           = 1
+	FieldCountry         = 2
+	FieldProvince        = 3
+	FieldCity            = 4
+	FieldOrganization    = 5
+	FieldNetwork         = 6
+	FieldLng             = 7
+	FieldLat             = 8
+	FieldTimeZone        = 9
+	FieldUTC             = 10
+	FieldRegionalismCode = 11
+	FieldPhoneCode       = 12
+	FieldCountryCode     = 13
+	FieldContinentCode   = 14
+	FieldEnd             = 15
+)
+
+type fieldInfo struct {
+	offset int
+	size   int
+	name   string
+	fixed  bool
+}
+
+var fieldInfos = [FieldEnd]fieldInfo{
+	FieldIpMin: fieldInfo{
+		name: "IpMin",
+	},
+	FieldIpMax: fieldInfo{
+		name: "IpMax",
+	},
+	FieldCountry: fieldInfo{
+		name:   "Country",
+		offset: 0,
+		size:   4,
+	},
+	FieldProvince: fieldInfo{
+		name:   "Province",
+		offset: 4,
+		size:   4,
+	},
+	FieldCity: fieldInfo{
+		name:   "City",
+		offset: 8,
+		size:   4,
+	},
+	FieldOrganization: fieldInfo{
+		name:   "Organization",
+		offset: 12,
+		size:   4,
+	},
+	FieldNetwork: fieldInfo{
+		name:   "Network",
+		offset: 16,
+		size:   4,
+	},
+	FieldLng: fieldInfo{
+		name:   "Lng",
+		offset: 20,
+		size:   4,
+	},
+	FieldLat: fieldInfo{
+		name:   "Lat",
+		offset: 24,
+		size:   4,
+	},
+	FieldTimeZone: fieldInfo{
+		name:   "TimeZone",
+		offset: 28,
+		size:   4,
+	},
+	FieldUTC: fieldInfo{
+		name:   "UTC",
+		offset: 32,
+		size:   4,
+	},
+	FieldRegionalismCode: fieldInfo{
+		name:   "RegionalismCode",
+		offset: 36,
+		size:   6,
+		fixed:  true,
+	},
+	FieldPhoneCode: fieldInfo{
+		name:   "PhoneCode",
+		offset: 42,
+		size:   4,
+		fixed:  true,
+	},
+	FieldCountryCode: fieldInfo{
+		name:   "CountryCode",
+		offset: 46,
+		size:   2,
+		fixed:  true,
+	},
+	FieldContinentCode: fieldInfo{
+		name:   "ContinentCode",
+		offset: 48,
+		size:   2,
+		fixed:  true,
+	},
+}
+
+type Field int
+
+func (me Field) String() string {
+	return fieldInfos[me].name
+}
+
+func (me Field) Offset() int {
+	return fieldInfos[me].offset
+}
+
+func (me Field) Size() int {
+	return fieldInfos[me].size
+}
+
+func (me Field) Fixed() bool {
+	return fieldInfos[me].fixed
+}
+
 const Sizeof_IpEntry = 50
 
 type IpEntry []byte

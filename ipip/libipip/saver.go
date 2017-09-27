@@ -57,7 +57,7 @@ func (me *Saver) saveSymbol(symbol string) SymbolDesc {
 	return desc
 }
 
-func (me *Saver) add(fields Fields) {
+func (me *Saver) add(fields []string) {
 	// skip it
 	if fields[FieldCountry] == "保留地址" {
 		return
