@@ -38,7 +38,20 @@ func perfrom(loader *ipip.Loader, times, co, cocount int) {
 	begin := time.Now().UnixNano()
 	for i := 0; i < times; i++ {
 		for _, ip := range prefixs {
-			loader.FindS(ip)
+			index := loader.FindS(ip)
+
+			loader.EntryField(index, ipip.FieldCountry)
+			loader.EntryField(index, ipip.FieldProvince)
+			loader.EntryField(index, ipip.FieldOrganization)
+			loader.EntryField(index, ipip.FieldNetwork)
+			loader.EntryField(index, ipip.FieldLng)
+			loader.EntryField(index, ipip.FieldLat)
+			loader.EntryField(index, ipip.FieldTimeZone)
+			loader.EntryField(index, ipip.FieldUTC)
+			loader.EntryField(index, ipip.FieldRegionalismCode)
+			loader.EntryField(index, ipip.FieldPhoneCode)
+			loader.EntryField(index, ipip.FieldCountryCode)
+			loader.EntryField(index, ipip.FieldContinentCode)
 		}
 	}
 	end := time.Now().UnixNano()
