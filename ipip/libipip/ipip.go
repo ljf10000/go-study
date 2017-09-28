@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"os"
 	"strings"
+	"unsafe"
 )
 
 /*
@@ -34,6 +35,10 @@ http://www.ipip.net/api.html
 const (
 	COUNT = 1024 * 1024
 )
+
+func bstring(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
 
 func Convert(src, dst string) {
 	f, err := os.Open(src)
