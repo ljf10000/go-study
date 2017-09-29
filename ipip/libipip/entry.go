@@ -16,8 +16,7 @@ type IpEntry struct {
 	Lng             SymbolDesc // 经度
 	Lat             SymbolDesc // 维度
 	TimeZone        SymbolDesc // 时区
-	UTC             int8         // UTC
-	_r              int8         // 保留
+	UTC             SymbolDesc // UTC
 	RegionalismCode [6]byte      // 中国行政区划代码
 	PhoneCode       [4]byte      // 国际电话代码
 	CountryCode     [2]byte      // 国家二位代码
