@@ -129,16 +129,13 @@ func (me *Saver) convert() {
 	loader := me.loader
 
 	for i := 0; i < 65536; i++ {
-		indexs := me.indexCache[i]
-		if nil == indexs {
-			continue
+		if indexs := me.indexCache[i]; nil != indexs {
+			count := len(indexs)
+			offset := len(loader.Indexs)
+			loader.Indexs = append(loader.Indexs, indexs...)
+
+			loader.Hash[i] = MakeIndexDesc(uint32(offset), uint32(count))
 		}
-
-		count := len(indexs)
-		offset := len(loader.Indexs)
-		loader.Indexs = append(loader.Indexs, indexs...)
-
-		loader.Hash[i] = MakeIndexDesc(uint32(offset), uint32(count))
 	}
 
 	loader.Indexs = loader.Indexs[:]
