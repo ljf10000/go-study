@@ -44,6 +44,7 @@ func perfrom(loader *ipip.Loader, times, co, cocount int) {
 
 			if !searchOnly {
 				var s string
+
 				s = loader.EntryField(index, ipip.FieldCountry)
 				s = loader.EntryField(index, ipip.FieldProvince)
 				s = loader.EntryField(index, ipip.FieldOrganization)
