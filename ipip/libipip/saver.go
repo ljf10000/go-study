@@ -74,9 +74,11 @@ func (me *Saver) add(fields []string) {
 	iEntry, entry := me.loader.newEntry()
 
 	setSymbol := func(field Field) {
-		desc := me.saveSymbol(fields[field])
+		s := fields[field]
 
+		desc := me.saveSymbol(s)
 		entry.setSymbol(field, desc)
+		field.SetMax(len(s))
 	}
 
 	setSymbol(FieldCountry)
@@ -141,6 +143,12 @@ func (me *Saver) convert() {
 	loader.Indexs = loader.Indexs[:]
 	loader.Entrys = loader.Entrys[:]
 	loader.Symbols = loader.Symbols[:]
+
+	for i := Field(0); i < FieldEnd; i++ {
+		if !i.Fixed() {
+			Log.Info("%s max=%d", i, i.Max())
+		}
+	}
 }
 
 func (me *Saver) save(file string) error {

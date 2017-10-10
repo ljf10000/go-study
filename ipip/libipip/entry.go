@@ -46,6 +46,7 @@ const (
 type fieldInfo struct {
 	offset int
 	size   int
+	max    int
 	name   string
 	fixed  bool
 }
@@ -144,6 +145,16 @@ func (me Field) Size() int {
 
 func (me Field) Fixed() bool {
 	return fieldInfos[me].fixed
+}
+
+func (me Field) Max() int {
+	return fieldInfos[me].max
+}
+
+func (me Field) SetMax(max int) {
+	if max > fieldInfos[me].max {
+		fieldInfos[me].max = max
+	}
 }
 
 const Sizeof_IpEntry = 50
