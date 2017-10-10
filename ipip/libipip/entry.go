@@ -151,9 +151,11 @@ func (me Field) Max() int {
 	return fieldInfos[me].max
 }
 
-func (me Field) SetMax(max int) {
-	if max > fieldInfos[me].max {
-		fieldInfos[me].max = max
+func (me Field) SaveMax(max int) {
+	info := &fieldInfos[me]
+
+	if max > info.max {
+		info.max = max
 	}
 }
 

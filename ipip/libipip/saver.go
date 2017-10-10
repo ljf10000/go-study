@@ -67,7 +67,7 @@ func (me *Saver) add(fields []string) {
 	ipstrmin := fields[FieldIpMin]
 	ipstrmax := fields[FieldIpMax]
 
-	// get ip pari address, network sort
+	// get ip pair address, network sort
 	ipmin := NewIpB(ipstrmin)
 	ipmax := NewIpB(ipstrmax)
 
@@ -78,7 +78,7 @@ func (me *Saver) add(fields []string) {
 
 		desc := me.saveSymbol(s)
 		entry.setSymbol(field, desc)
-		field.SetMax(len(s))
+		field.SaveMax(len(s))
 	}
 
 	setSymbol(FieldCountry)
