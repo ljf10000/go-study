@@ -171,6 +171,10 @@ func (me *Saver) addLL(fields []string) {
 	Lng := fields[FieldLng]
 	Lat := fields[FieldLat]
 
+	if "*" == Lng || "*" == Lat {
+		return
+	}
+
 	Country := fields[FieldCountry]
 	Province := fields[FieldProvince]
 	City := fields[FieldCity]
