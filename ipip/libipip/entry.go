@@ -1,6 +1,7 @@
 package libipip
 
 import (
+	. "asdf"
 	"encoding/binary"
 )
 
@@ -156,6 +157,14 @@ func (me Field) SaveMax(max int) {
 
 	if max > info.max {
 		info.max = max
+	}
+}
+
+func dumpFieldMax() {
+	for i := Field(0); i < FieldEnd; i++ {
+		if !i.Fixed() {
+			Log.Info("%s max=%d", i, i.Max())
+		}
 	}
 }
 

@@ -3,6 +3,8 @@ package libipip
 import (
 	. "asdf"
 	"encoding/gob"
+	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -27,11 +29,159 @@ func logTestIp(ipt string, iEntry uint32) {
 	}
 }
 
+type LL struct {
+	Lng string
+	Lat string
+}
+
+type LLMap map[LL]bool
+
+type LLClass struct {
+	all    map[string]LLMap
+	single map[string]LLMap
+	multi  map[string]LLMap
+	export map[string][]LL
+}
+
+func newLLClass() *LLClass {
+	return &LLClass{
+		all:    map[string]LLMap{},
+		single: map[string]LLMap{},
+		multi:  map[string]LLMap{},
+		export: map[string][]LL{},
+	}
+}
+
+func (me *LLClass) dispatch() {
+	for k, v := range me.all {
+		if 1 == len(v) {
+			me.single[k] = v
+		} else {
+			me.multi[k] = v
+		}
+
+		list := []LL{}
+		for k2, _ := range v {
+			list = append(list, k2)
+		}
+		me.export[k] = list
+	}
+}
+
+func (me *LLClass) dump(tag string) {
+	prefix := Empty
+	if Empty != tag {
+		prefix = tag + " "
+	}
+
+	Log.Info(prefix+"single:%d", len(me.single))
+	for k, v := range me.single {
+		Log.Info(Tab+"%d:%s", len(v), k)
+	}
+
+	Log.Info(prefix+"multi:%d", len(me.multi))
+	for k, v := range me.multi {
+		Log.Info(Tab+"%d:%s", len(v), k)
+	}
+}
+
+type LLDB struct {
+	org    *LLClass
+	normal *LLClass
+}
+
+func newLLDB() *LLDB {
+	return &LLDB{
+		org:    newLLClass(),
+		normal: newLLClass(),
+	}
+}
+
+func (me *LLDB) dispatch() {
+	me.org.dispatch()
+	me.normal.dispatch()
+}
+
+func (me *LLDB) dump() {
+	me.org.dump("org")
+	me.normal.dump(Empty)
+}
+
+func (me *LLDB) export(file string) {
+	buf, err := json.MarshalIndent(me.normal.export, "", Tab)
+	if nil != err {
+		Panic("invalid normal export")
+	}
+
+	f, err := os.Create(file)
+	if nil != err {
+		Panic("create %s error:%s", file, err)
+	}
+	defer f.Close()
+
+	f.WriteString(string(buf))
+}
+
+func isOrgString(s string) bool {
+	for _, v := range s {
+		if (v >= 'a' && v <= 'z') || (v >= 'A' && v <= 'Z') {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (me *LLDB) add(key, lng, lat string) {
+	ll := LL{
+		Lng: lng,
+		Lat: lat,
+	}
+
+	class := me.normal
+	if isOrgString(key) {
+		class = me.org
+	}
+
+	if _, ok := class.all[key]; !ok {
+		class.all[key] = LLMap{}
+	}
+
+	class.all[key][ll] = true
+}
+
 type Saver struct {
 	loader *Loader
 
 	indexCache [65536][]IpIndex
 	symbolMap  map[string]SymbolDesc
+
+	lldb [3]*LLDB
+}
+
+func (me *Saver) export() {
+	for k, v := range me.lldb {
+		v.dispatch()
+		v.dump()
+		v.export(fmt.Sprintf("level%d.json", k))
+	}
+}
+
+func (me *Saver) addLL(fields []string) {
+	Lng := fields[FieldLng]
+	Lat := fields[FieldLat]
+
+	Country := fields[FieldCountry]
+	Province := fields[FieldProvince]
+	City := fields[FieldCity]
+
+	if "*" != City {
+		me.lldb[2].add(Country+"/"+Province+"/"+City, Lng, Lat)
+	} else if "*" != Province {
+		me.lldb[1].add(Country+"/"+Province, Lng, Lat)
+	} else if "*" != Country {
+		me.lldb[0].add(Country, Lng, Lat)
+	}
 }
 
 func newSaver() *Saver {
@@ -44,6 +194,7 @@ func newSaver() *Saver {
 		},
 		indexCache: [65536][]IpIndex{},
 		symbolMap:  map[string]SymbolDesc{},
+		lldb:       [3]*LLDB{newLLDB(), newLLDB(), newLLDB()},
 	}
 }
 
@@ -59,9 +210,15 @@ func (me *Saver) saveSymbol(symbol string) SymbolDesc {
 
 func (me *Saver) add(fields []string) {
 	// skip it
-	if fields[FieldCountry] == "保留地址" {
+	switch fields[FieldCountry] {
+	case "保留地址",
+		"本机地址",
+		"本地链路",
+		"局域网":
 		return
 	}
+
+	me.addLL(fields)
 
 	// get ip pair string
 	ipstrmin := fields[FieldIpMin]
@@ -144,11 +301,7 @@ func (me *Saver) convert() {
 	loader.Entrys = loader.Entrys[:]
 	loader.Symbols = loader.Symbols[:]
 
-	for i := Field(0); i < FieldEnd; i++ {
-		if !i.Fixed() {
-			Log.Info("%s max=%d", i, i.Max())
-		}
-	}
+	dumpFieldMax()
 }
 
 func (me *Saver) save(file string) error {

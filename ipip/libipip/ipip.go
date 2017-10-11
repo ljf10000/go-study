@@ -40,18 +40,18 @@ func bstring(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-func Convert(src, dst string) {
-	f, err := os.Open(src)
+func Convert(fileTxtx, fileBin string) {
+	f, err := os.Open(fileTxtx)
 	if nil != err {
 		panic(err.Error())
 	}
 	defer f.Close()
-	Log.Info("open file:%s", src)
+	Log.Info("open file:%s", fileTxtx)
 
 	r := bufio.NewScanner(f)
 	saver := newSaver()
 
-	Log.Info("scan file:%s ...", src)
+	Log.Info("scan file:%s ...", fileTxtx)
 	count := 0
 	for r.Scan() {
 		line := r.Text()
@@ -61,14 +61,21 @@ func Convert(src, dst string) {
 			Panic("invalid ipip line(%d element)", len(fields))
 		}
 
+		iField := len(fields)
+		for i := 0; i < iField; i++ {
+			// fields[i] = strings.TrimSpace(fields[i])
+			fields[i] = strings.Replace(fields[i], " ", "", -1)
+		}
+
 		count++
 		//Log.Info("%d:line:%s", count, line)
 		saver.add(fields)
 	}
-	Log.Info("scan file:%s ok.", src)
+	Log.Info("scan file:%s ok.", fileTxtx)
 
 	saver.convert()
-	saver.save(dst)
+	saver.save(fileBin)
+	saver.export()
 }
 
 func Load(file string) (*Loader, error) {

@@ -43,11 +43,13 @@ func (me Logic) String() string {
 }
 
 func hasLogicPrefix(s string) (Logic, bool) {
-	for k, v := range logics {
+	for i := Logic(0); i < LogicEnd; i++ {
+		v := logics[i]
+
 		if strings.HasPrefix(s, v) {
 			Log.Info("has logic prefix:%s", v)
 
-			return Logic(k), true
+			return i, true
 		}
 	}
 
@@ -82,11 +84,13 @@ func (me Op) String() string {
 }
 
 func hasOpPrefix(s string) (Op, bool) {
-	for k, v := range operators {
+	for i := Op(0); i < OpEnd; i++ {
+		v := operators[i]
+
 		if strings.HasPrefix(s, v) {
 			Log.Info("has op prefix:%s", v)
 
-			return Op(k), true
+			return i, true
 		}
 	}
 
