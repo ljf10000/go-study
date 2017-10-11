@@ -1,99 +1,179 @@
 package libexpr
 
-const (
-	ScopeALl  Scope = 0
-	ScopeZone Scope = 1
-	ScopePath Scope = 2
-	ScopeEnd  Scope = 3
+import (
+	. "asdf"
+	"errors"
+	"fmt"
+	"unicode/utf8"
 )
-
-type Scope int
 
 type Expr struct {
 	Left  *Expr
 	Rigth *Expr
+	Logic Logic
 
-	Op    Operator
+	Op    Op
 	Scope Scope
 	Key   string
 	Value string
 }
 
+type Token struct {
+	Type  Type
+	value interface{}
+}
+
+func (me *Token) Op() Op {
+	return me.value.(Op)
+}
+
+func (me *Token) Logic() Logic {
+	return me.value.(Logic)
+}
+
+func (me *Token) Value() string {
+	return me.value.(string)
+}
+
 type Lex struct {
-	Root        *Expr
-	Line        string
-	Token       string
-	Tokens      []string
-	last        rune
-	current     rune
-	quot        rune
-	inQuot      bool
-	parentheses int
+	line   string
+	token  string
+	tokens []string
+	quot   rune
+	inQuot bool
 }
 
 func (me *Lex) Scan(line string) error {
-	me.Line = line
+	me.line = line
 
 	return me.scan()
 }
 
+func (me *Lex) dump() string {
+	s := ""
+
+	s += fmt.Sprintf("Line:%s\n", me.line)
+	s += "Tokens:\n"
+	for _, token := range me.tokens {
+		s += fmt.Sprintf("\t%s\n", token)
+	}
+
+	return s
+}
+
 func (me *Lex) scan() error {
-	for idx, c := range me.Line {
-		err := me.char(idx, c)
+	var err error
+
+	for line := me.line; Empty != line; {
+		line, err = me.handle(line)
 		if nil != err {
 			return err
 		}
 	}
+	me.saveToken(Empty)
 
 	return nil
 }
 
-func (me *Lex) char(idx int, c rune) error {
-	me.current = c
-
-	defer func() {
-		me.last = c
-	}()
-
-	if me.inQuot {
-		return me.quotHandle(idx, c)
-	}
-
-	switch c {
-	case '"', '\'':
-		me.inQuot = true
-		me.quot = c
-		me.Token = ""
-	case '(':
-		me.parentheses++
-		me.saveToken(string(c))
-	case ')':
-		me.parentheses--
-		me.saveToken(string(c))
-	case ' ', '\t':
-		me.skip(c)
+func (me *Lex) handle(line string) (string, error) {
+	switch me.quot {
+	case 0:
+		return me.normalHandle(line)
+	case '\'':
+		return me.singleQuotHandle(line)
+	case '"':
+		return me.doubleQuotHandle(line)
 	default:
-		me.save(c)
+		return Empty, errors.New("bad quot")
 	}
-
-	return nil
 }
 
-func (me *Lex) quotHandle(idx int, c rune) error {
+func (me *Lex) normalHandle(line string) (string, error) {
+	c, _ := utf8.DecodeRuneInString(line)
+	Log.Info("handle normal line:%s", line)
+
+	if v, ok := hasOpPrefix(line); ok {
+		me.saveToken(v.String())
+
+		return line[len(v.String()):], nil
+	} else if v, ok := hasLogicPrefix(line); ok {
+		me.saveToken(v.String())
+
+		return line[len(v.String()):], nil
+	} else {
+		switch c {
+		case ' ', '\t':
+			me.skip(c)
+			me.saveToken(Empty)
+		case '"', '\'':
+			me.skip(c)
+			me.quot = c
+			me.token = Empty
+
+			Log.Info("begin quot:%c", c)
+		case '(', ')':
+			me.saveToken(string(c))
+		default:
+			me.save(c)
+		}
+
+		return line[len(string(c)):], nil
+	}
+}
+
+func (me *Lex) singleQuotHandle(line string) (string, error) {
+	c, _ := utf8.DecodeRuneInString(line)
+	Log.Info("handle single quot line:%s", line)
+
 	if c == me.quot {
-		// close quot
-		me.inQuot = false
-		me.saveToken(me.Token)
+		me.closeQuot()
 	} else {
 		me.save(c)
 	}
 
-	return nil
+	return line[len(string(c)):], nil
+}
+
+func (me *Lex) doubleQuotHandle(line string) (string, error) {
+	c, _ := utf8.DecodeRuneInString(line)
+	Log.Info("handle double quot line:%s", line)
+
+	if s, e, ok := hasEscapePrefix(line); ok {
+		me.save(e)
+
+		return line[len(s):], nil
+	}
+
+	switch c {
+	case me.quot:
+		me.closeQuot()
+	default:
+		me.save(c)
+	}
+
+	return line[len(string(c)):], nil
+}
+
+func (me *Lex) closeQuot() {
+	// close quot
+	me.quot = 0
+	me.saveToken(Empty)
+
+	Log.Info("end quot")
 }
 
 func (me *Lex) saveToken(token string) {
-	me.Tokens = append(me.Tokens, token)
-	me.Token = ""
+	if Empty != me.token {
+		Log.Info("save auto token:%s", me.token)
+		me.tokens = append(me.tokens, me.token)
+	}
+
+	if Empty != token {
+		Log.Info("save spec token:%s", token)
+		me.tokens = append(me.tokens, token)
+	}
+
+	me.token = Empty
 }
 
 func (me *Lex) skip(c rune) {
@@ -101,5 +181,5 @@ func (me *Lex) skip(c rune) {
 }
 
 func (me *Lex) save(c rune) {
-	me.Token += string(c)
+	me.token += string(c)
 }
