@@ -30,8 +30,8 @@ func logTestIp(ipt string, iEntry uint32) {
 }
 
 type LL struct {
-	Lat string // 纬度
 	Lng string // 经度
+	Lat string // 纬度
 }
 
 type LLMap map[LL]bool
