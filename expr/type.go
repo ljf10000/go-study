@@ -5,14 +5,34 @@ import (
 	"strings"
 )
 
+func hasPrefix(s string, maps []string) (int, bool) {
+	count := len(maps)
+	for i := 0; i < count; i++ {
+		v := maps[i]
+
+		if strings.HasPrefix(s, v) {
+			Log.Info("has prefix:%s", v)
+
+			return i, true
+		}
+	}
+
+	return 0, false
+}
+
+//==============================================================================
+
 const (
-	TypeLogic  Type = 0
-	TypeOp     Type = 1
-	TypeString Type = 2
-	TypeEnd    Type = 3
+	TypeString Type = 0
+	TypeLogic  Type = 1
+	TypeOp     Type = 2
+	TypeKey    Type = 3
+	TypeEnd    Type = 4
 )
 
 type Type int
+
+//==============================================================================
 
 const (
 	ScopeAll  Scope = 0
@@ -23,6 +43,30 @@ const (
 
 type Scope int
 
+//==============================================================================
+const (
+	TkOpBegin Tk = 0
+	TkEqGe    Tk = TkOpBegin
+	TkGe      Tk = 1
+	TkEqLe    Tk = 2
+	TkLe      Tk = 3
+	TkEq      Tk = 4
+	TkInc     Tk = 5
+	TkNeq     Tk = 6
+	TkOpEnd   Tk = 7
+
+	TkLogicBegin Tk = TkOpEnd
+	TkAnd        Tk = TkLogicBegin
+	TkOr         Tk = 8
+	TkNot        Tk = 9
+	TkLogicEnd   Tk = 10
+	TkLp         Tk = 10
+	TkRp         Tk = 11
+	TkEnd        Tk = 12
+)
+
+type Tk int
+
 const (
 	LogicAnd Logic = 0
 	LogicOr  Logic = 1
@@ -30,7 +74,7 @@ const (
 	LogicEnd Logic = 3
 )
 
-var logics = [LogicEnd]string{
+var exprLogics = [LogicEnd]string{
 	LogicAnd: "&&",
 	LogicOr:  "||",
 	LogicNot: "!",
@@ -39,22 +83,16 @@ var logics = [LogicEnd]string{
 type Logic int
 
 func (me Logic) String() string {
-	return logics[me]
+	return exprLogics[me]
 }
 
 func hasLogicPrefix(s string) (Logic, bool) {
-	for i := Logic(0); i < LogicEnd; i++ {
-		v := logics[i]
+	idx, ok := hasPrefix(s, exprLogics[:])
 
-		if strings.HasPrefix(s, v) {
-			Log.Info("has logic prefix:%s", v)
-
-			return i, true
-		}
-	}
-
-	return LogicEnd, false
+	return Logic(idx), ok
 }
+
+//==============================================================================
 
 const (
 	OpEqGe    Op = 0 // >=
@@ -67,7 +105,7 @@ const (
 	OpEnd     Op = 7
 )
 
-var operators = [OpEnd]string{
+var exprOperators = [OpEnd]string{
 	OpEqGe:    ">=",
 	OpGe:      ">",
 	OpEqLe:    "<=",
@@ -80,29 +118,48 @@ var operators = [OpEnd]string{
 type Op int
 
 func (me Op) String() string {
-	return operators[me]
+	return exprOperators[me]
 }
 
 func hasOpPrefix(s string) (Op, bool) {
-	for i := Op(0); i < OpEnd; i++ {
-		v := operators[i]
+	idx, ok := hasPrefix(s, exprOperators[:])
 
-		if strings.HasPrefix(s, v) {
-			Log.Info("has op prefix:%s", v)
-
-			return i, true
-		}
-	}
-
-	return OpEnd, false
+	return Op(idx), ok
 }
+
+//==============================================================================
+
+const (
+	KeyLP  Key = 0 // (
+	KeyRP  Key = 1 // )
+	KeyEnd Key = 2
+)
+
+var exprKeys = [KeyEnd]string{
+	KeyLP: "(",
+	KeyRP: ")",
+}
+
+type Key int
+
+func (me Key) String() string {
+	return exprKeys[me]
+}
+
+func hasKeyPrefix(s string) (Key, bool) {
+	idx, ok := hasPrefix(s, exprKeys[:])
+
+	return Key(idx), ok
+}
+
+//==============================================================================
 
 type EscapeInfo struct {
 	s string
 	c rune
 }
 
-var escapes = []EscapeInfo{
+var exprEscapes = []EscapeInfo{
 	EscapeInfo{
 		s: `\n`,
 		c: '\n',
@@ -114,7 +171,7 @@ var escapes = []EscapeInfo{
 }
 
 func hasEscapePrefix(s string) (string, rune, bool) {
-	for _, v := range escapes {
+	for _, v := range exprEscapes {
 		if strings.HasPrefix(s, v.s) {
 			Log.Info("has escape prefix:%s", v.s)
 

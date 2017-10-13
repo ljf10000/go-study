@@ -14,11 +14,12 @@ func Test1(t *testing.T) {
 	}
 
 	for _, line := range lines {
-		lex := &Lex{
-			line: line,
+		lex := NewLex(line)
+		err := lex.LineScan()
+		if nil != err {
+			t.Error(err)
 		}
 
-		lex.scan()
-		Log.Info(lex.dump())
+		Log.Info(lex.DumpToken())
 	}
 }

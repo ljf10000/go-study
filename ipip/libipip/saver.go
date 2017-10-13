@@ -30,8 +30,8 @@ func logTestIp(ipt string, iEntry uint32) {
 }
 
 type LL struct {
-	Lng string
 	Lat string
+	Lng string
 }
 
 type LLMap map[LL]bool

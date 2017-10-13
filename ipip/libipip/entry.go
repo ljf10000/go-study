@@ -14,8 +14,8 @@ type IpEntry struct {
 	City            SymbolDesc // 地区或城市 （国内）
 	Organization    SymbolDesc // 学校或单位 （国内）
 	Network         SymbolDesc // 运营商
-	Lng             SymbolDesc // 经度
-	Lat             SymbolDesc // 维度
+	Lng             SymbolDesc // 维度
+	Lat             SymbolDesc // 经度
 	TimeZone        SymbolDesc // 时区
 	UTC             SymbolDesc // UTC
 	RegionalismCode [6]byte      // 中国行政区划代码
