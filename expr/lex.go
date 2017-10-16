@@ -2,153 +2,245 @@ package libexpr
 
 import (
 	. "asdf"
-	"errors"
-	"fmt"
-	"unicode/utf8"
 )
 
-type Term []Token
+const (
+	SINGLE_QUOT = '\''
+	DOUBLE_QUOT = '"'
+)
 
-type Lex struct {
-	line  string
-	token string
-	term  Term
-	terms []Term
-	quot  rune
-	level int
+type lex struct {
+	line      string
+	level     int
+	quot      rune
+	token     *Token
+	tkComplet bool
+	atomic    *Atomic
+	expr      *Expr
+	root      *Expr
+	stack     []*Expr
 }
 
-func NewLex(line string) *Lex {
-	return &Lex{
+func newLex(line string) *lex {
+	return &lex{
 		line: line,
-		term: Term{},
 	}
 }
 
-func (me *Lex) DumpToken() string {
-	s := ""
-
-	s += fmt.Sprintf("Line:%s\n", me.line)
-	s += "Tokens:\n"
-	for _, token := range me.term {
-		s += fmt.Sprintf("\t%s\n", token.value)
-	}
-
-	return s
+func (me *lex) flush() {
+	// todo
 }
 
-func (me *Lex) TokenScan() error {
-	return nil
-}
-
-func (me *Lex) tokenScan(term Term) (Term, error) {
-	count := len(term)
-	if 0 == count {
-
-	} else if 1 == count {
-
+func (me *lex) Token(v string) *Token {
+	if Empty != v {
+		return &Token{
+			typ:   TypeString,
+			value: v,
+			level: me.level,
+		}
 	} else {
-
+		return nil
 	}
-
-	return nil, nil
 }
 
-func (me *Lex) LineScan() error {
-	for line := me.line; Empty != line; {
-		line = me.lineHandle(line)
+func (me *lex) newToken(v string) *Token {
+	return &Token{
+		typ:   TypeString,
+		value: v,
+		level: me.level,
 	}
-
-	return me.endLineScan()
 }
 
-func (me *Lex) endLineScan() error {
+func (me *lex) buildinToken(buildin Buildin) *Token {
+	return &Token{
+		typ:   buildin.Type(),
+		value: buildin,
+		level: me.level,
+	}
+}
+
+func (me *lex) openToken() {
+	me.token = me.newToken(Empty)
+	me.tkComplet = false
+}
+
+func (me *lex) closeToken() {
+	me.tkComplet = true
+}
+
+func (me *lex) openQuot(c rune) {
+	me.closeToken()
+	me.quot = c
+
+	Log.Info("open quot")
+}
+
+func (me *lex) closeQuot() {
+	me.closeToken()
+	me.quot = 0
+
+	Log.Info("close quot")
+}
+
+func (me *lex) openPar() {
+	me.closeToken()
+	me.level++
+
+	Log.Info("open %d:quot", me.level)
+
+	// todo
+}
+
+func (me *lex) closePar() {
+	me.closeToken()
+	// todo
+
+	Log.Info("close %d:quot", me.level)
+	me.level--
+}
+
+func (me *lex) pushBuildin(buildin Buildin) {
+	token := me.buildinToken(buildin)
+
+	me.pushToken(token)
+}
+
+func (me *lex) pushToken(token *Token) {
+	me.closeToken()
+
+	if nil != token {
+		if nil != me.token {
+			// todo
+		} else {
+			me.token = token
+			me.closeToken()
+		}
+	}
+}
+
+func (me *lex) pushChar(c rune) {
+	if nil == me.token {
+		me.openToken()
+	}
+
+	if !me.tkComplet {
+		me.token.PushChar(c)
+	} else {
+		// todo
+	}
+}
+
+func (me *lex) stop() {
+	// end scan
+	me.flush()
+
 	// check ' or " close
 	switch me.quot {
-	case '\'':
-		if 0 != me.quot {
-			return errors.New(`not close '`)
-		}
-	case '"':
-		if 0 != me.quot {
-			return errors.New(`not close "`)
-		}
-	}
-
-	// end scan
-	me.pushToken()
-
-	return nil
-}
-
-func (me *Lex) lineHandle(line string) string {
-	switch me.quot {
-	case 0:
-		return me.lineNormalHandle(line)
-	case '\'':
-		return me.lineSingleQuotHandle(line)
-	case '"':
-		return me.lineDoubleQuotHandle(line)
-	default:
-		return line
+	case SINGLE_QUOT:
+		panic(`not close '`)
+	case DOUBLE_QUOT:
+		panic(`not close "`)
 	}
 }
 
-func (me *Lex) lineNormalHandle(line string) string {
-	c, _ := utf8.DecodeRuneInString(line)
-	Log.Info("handle normal line:%s", line)
+func (me *lex) start() {
+	line := me.line
 
-	Len := 0
-	if v, ok := hasOpPrefix(line); ok {
-		Len = len(v.String())
+	for len(line) > 0 {
+		line = me.scan(line)
+	}
 
-		me.pushOp(v)
-	} else if v, ok := hasLogicPrefix(line); ok {
-		Len = len(v.String())
+	me.stop()
+}
 
-		me.pushLogic(v)
-	} else if v, ok := hasKeyPrefix(line); ok {
-		Len = len(v.String())
-
-		me.pushKey(v)
+func (me *lex) scan(line string) string {
+	if 0 == len(line) {
+		return Empty
+	} else if v, ok := hasBuildinPrefix(line); ok {
+		return me.scanBuildin(v, line)
 	} else {
-		Len = len(string(c))
-
-		switch c {
-		case ' ', '\t':
-			me.skipChar(c)
-			me.pushToken()
-		case '"', '\'':
-			me.skipChar(c)
-			me.quot = c
-			me.token = Empty
-
-			Log.Info("begin quot:%c", c)
-		default:
-			me.pushChar(c)
-		}
+		return me.scanNormal(line)
 	}
-
-	return line[Len:]
 }
 
-func (me *Lex) lineSingleQuotHandle(line string) string {
-	c, _ := utf8.DecodeRuneInString(line)
-	Log.Info("handle single quot line:%s", line)
+func (me *lex) scanBuildin(buildin Buildin, line string) string {
+	switch buildin {
+	case BuildinLp:
+		me.openPar()
+
+		return line[1:]
+	case BuildinRp:
+		me.closePar()
+
+		return line[1:]
+	default:
+		me.pushBuildin(buildin)
+
+		return line[len(buildin.String()):]
+	}
+}
+
+func (me *lex) scanNormal(line string) string {
+	c, line := FirstRune(line)
+
+	switch c {
+	case ' ', '\t':
+		// skip space
+		me.closeToken()
+	case SINGLE_QUOT:
+		Log.Info("begin single quot")
+		line = me.scanQuot(c, line, me.singleQuot)
+	case DOUBLE_QUOT:
+		Log.Info("begin double quot")
+		line = me.scanQuot(c, line, me.doubleQuot)
+	default:
+		me.pushChar(c)
+
+		line = me.scan(line)
+	}
+
+	return line
+}
+
+type QuotScan func(line string) (bool, string)
+
+func (me *lex) scanQuot(quot rune, line string, scan QuotScan) string {
+	closed := false
+
+	me.openQuot(quot)
+
+	for {
+		closed, line = scan(line)
+		if closed {
+			return line
+		}
+	}
+}
+
+func (me *lex) singleQuot(line string) (bool, string) {
+	closed := false
+
+	var c rune
+	c, line = FirstRune(line)
 
 	switch c {
 	case me.quot:
 		me.closeQuot()
+		closed = true
 	default:
 		me.pushChar(c)
 	}
 
-	return line[len(string(c)):]
+	return closed, line
 }
 
-func (me *Lex) escape(line string) string {
-	if s, e, ok := hasEscapePrefix(line); ok {
-		me.pushChar(e)
+func (me *lex) doubleQuot(line string) (bool, string) {
+	return me.singleQuot(me.escape(line))
+}
+
+func (me *lex) escape(line string) string {
+	if s, c, ok := hasEscapePrefix(line); ok {
+		me.pushChar(c)
 
 		line = line[len(s):]
 	}
@@ -156,64 +248,10 @@ func (me *Lex) escape(line string) string {
 	return line
 }
 
-func (me *Lex) lineDoubleQuotHandle(line string) string {
-	return me.lineSingleQuotHandle(me.escape(line))
-}
-
-func (me *Lex) closeQuot() {
-	// close quot
-	me.quot = 0
-	me.pushToken()
-
-	Log.Info("end quot")
-}
-
-func (me *Lex) pushToken() {
-	if Empty != me.token {
-		Log.Info("save auto token:%s", me.token)
-		me.term = append(me.term, Token{
-			Type:  TypeString,
-			value: me.token,
-		})
+func Scan(line string) {
+	lex := &lex{
+		line: line,
 	}
 
-	me.token = Empty
-}
-
-func (me *Lex) pushOp(token Op) {
-	me.pushToken()
-
-	Log.Info("save Op token:%s", token)
-	me.term = append(me.term, Token{
-		Type:  TypeOp,
-		value: token,
-	})
-}
-
-func (me *Lex) pushLogic(token Logic) {
-	me.pushToken()
-
-	Log.Info("save Logic token:%s", token)
-	me.term = append(me.term, Token{
-		Type:  TypeLogic,
-		value: token,
-	})
-}
-
-func (me *Lex) pushKey(token Key) {
-	me.pushToken()
-
-	Log.Info("save Key token:%s", token)
-	me.term = append(me.term, Token{
-		Type:  TypeKey,
-		value: token,
-	})
-}
-
-func (me *Lex) skipChar(c rune) {
-	// do nothing
-}
-
-func (me *Lex) pushChar(c rune) {
-	me.token += string(c)
+	lex.start()
 }
