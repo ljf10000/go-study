@@ -68,7 +68,14 @@ func (me *lex1) flushExpr() {
 }
 
 func (me *lex1) skipChar(c rune) {
-	Log.Info("skip [%s]", string(c))
+	switch c {
+	case CHAR_CRLF:
+		Log.Info("skip [CRLF]")
+	case CHAR_SPACE:
+		Log.Info("skip [SPACE]")
+	case CHAR_TAB:
+		Log.Info("skip [TAB]")
+	}
 
 	me.flushToken()
 }
