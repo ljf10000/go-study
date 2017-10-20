@@ -28,7 +28,7 @@ type lex3 struct {
 
 func (me *lex3) DumpString() string {
 	s := "lex3:" + Crlf
-	s += me.expr.LString(0)
+	s += exprExampl(me.expr, 0)
 
 	return s
 }
@@ -50,7 +50,7 @@ func (me *lex3) stop() {
 	case eFsmAtomic, eFsmSingleOk, eFsmExprOk:
 		DoNothing()
 	case eFsmExpr:
-		me.expr = me.expr.children[0]
+		me.expr = me.expr.Children[0]
 	default:
 		Panic("left fsm[%s]", me.expr.fsm)
 	}
@@ -96,7 +96,7 @@ func (me *lex3) scanOnFsmInit(tokens []*Token) []*Token {
 		//    ++>
 		// [SINGLE]
 		me.expr.setFsm(eFsmSingle)
-		me.expr.logic = token.Logic()
+		me.expr.Logic = token.Logic()
 	case TypeMulti:
 		// []
 		// [] + MULTI
@@ -188,13 +188,13 @@ func (me *lex3) scanOnFsmExpr(tokens []*Token) []*Token {
 		expr1 := newExprSingleOk(expr)
 
 		me.expr.setFsm(eFsmExprOk)
-		me.expr.logic = LogicAnd
+		me.expr.Logic = LogicAnd
 		me.expr.pushExpr(expr1)
 	case TypeMulti:
 		// [expr]
 		// [expr] + MULTI
 		me.expr.setFsm(eFsmExprMulti)
-		me.expr.logic = token.Logic()
+		me.expr.Logic = token.Logic()
 	case TypeExprAtomic, TypeExprRaw:
 		// [expr]
 		// [expr] + m-expr
@@ -202,7 +202,7 @@ func (me *lex3) scanOnFsmExpr(tokens []*Token) []*Token {
 		//    ++>
 		// [expr + AND + m-expr]
 		me.expr.setFsm(eFsmExprOk)
-		me.expr.logic = LogicAnd
+		me.expr.Logic = LogicAnd
 		me.expr.pushExpr(token.expr())
 	default:
 		me.TokenPanic(token)
@@ -261,7 +261,7 @@ func (me *lex3) scanOnFsmExprOk(tokens []*Token) []*Token {
 		// [expr + MULTI + expr] + SINGLE
 		// [expr + MULTI + expr] + AND + SINGLE
 		expr, tokens = pickFirstExpr(tokens)
-		if me.expr.logic == LogicAnd {
+		if me.expr.Logic == LogicAnd {
 			// [expr + AND + expr] + AND + [SINGLE + next(expr)]
 			//    ==>
 			// [expr + AND + expr] + AND + expr
@@ -283,7 +283,7 @@ func (me *lex3) scanOnFsmExprOk(tokens []*Token) []*Token {
 	case TypeMulti:
 		// [expr + MULTI + expr]
 		// [expr + MULTI + expr] + MULTI
-		if me.expr.logic == token.Logic() {
+		if me.expr.Logic == token.Logic() {
 			// [expr + MULTI + expr] + MULTI(same)
 			//    ++>
 			// [expr + MULTI + expr + MULTI]
@@ -295,14 +295,14 @@ func (me *lex3) scanOnFsmExprOk(tokens []*Token) []*Token {
 			expr := me.expr
 
 			me.expr = newExpr(eFsmExprMulti)
-			me.expr.logic = token.Logic()
+			me.expr.Logic = token.Logic()
 			me.expr.pushExpr(expr)
 		}
 	case TypeExprAtomic, TypeExprRaw:
 		// [expr + MULTI + expr]
 		// [expr + MULTI + expr] + m-expr
 		// [expr + MULTI + expr] + AND + m-expr
-		if me.expr.logic == LogicAnd {
+		if me.expr.Logic == LogicAnd {
 			// [expr + AND + expr] + AND + m-expr
 			// ++>
 			// [expr + AND + expr]

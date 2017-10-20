@@ -41,9 +41,9 @@ func newAtomic() *Atomic {
 }
 
 type Atomic struct {
-	op  Buildin
-	k   *Keyword
-	v   string
+	Op  Op
+	K   *Keyword
+	V   string
 	fsm aFsm
 }
 
@@ -52,17 +52,7 @@ func (me *Atomic) TypeString() string {
 }
 
 func (me *Atomic) String() string {
-	return fmt.Sprintf("{k:%s,op:%s,v:%s}", me.k, me.op, me.v)
-}
-
-func (me *Atomic) LString(level int) string {
-	s := me.TypeString() + "{" + Crlf
-	s += TabN(level+1) + fmt.Sprintf("k: %s,", me.k) + Crlf
-	s += TabN(level+1) + fmt.Sprintf("op: %s,", me.op) + Crlf
-	s += TabN(level+1) + fmt.Sprintf("v: %s,", me.v) + Crlf
-	s += TabN(level) + "}"
-
-	return s
+	return fmt.Sprintf("{k:%s,op:%s,v:%s}", me.K, me.Op, me.V)
 }
 
 func (me *Atomic) setFsm(fsm aFsm) aFsm {
@@ -79,8 +69,8 @@ func (me *Atomic) toDeft() *Atomic {
 		Panic("cannot convert fsm[%s] to deft", me.fsm)
 	}
 
-	me.k = deftKeyword()
-	me.op = OpInclude
+	me.K = deftKeyword()
+	me.Op = OpInclude
 	me.setFsm(aFsmOk)
 
 	return me

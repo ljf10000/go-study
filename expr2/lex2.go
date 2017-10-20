@@ -115,13 +115,13 @@ func (me *lex2) scanOnFsmInit(tokens []*Token) []*Token {
 		// 0. []
 		// 1. [] + keyword
 		// 2. keyword
-		atomic.k = token.Keyword()
+		atomic.K = token.Keyword()
 		atomic.setFsm(aFsmKey)
 	case TypeValue:
 		// 0. []
 		// 1. [] + value
 		// 2. value
-		atomic.v = token.Value()
+		atomic.V = token.Value()
 		atomic.setFsm(aFsmValue)
 	case TypeSingle:
 		// 0. []
@@ -162,7 +162,7 @@ func (me *lex2) scanOnFsmKey(tokens []*Token) []*Token {
 	case TypeOperator:
 		// 0. keyword
 		// 1. keyword + op
-		atomic.op = token.Buildin()
+		atomic.Op = token.Op()
 		atomic.setFsm(aFsmKeyOp)
 	default:
 		me.TokenPanic(token)
@@ -176,59 +176,27 @@ func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 	atomic := me.atomic
 
 	switch token.t {
-	case TypeValue:
-		// 0. value
-		// 1. value + value
-		// 2. ALL INCLUDE value + AND + value
-		// 3. atomic AND value
+	case TypeValue, TypeKeyWord, TypeSingle, TypeExprRaw:
+		// 0. [value]
+		// 1. [value] + value2|keyword|SINGLE|EXPR
+		// 2. [ALL INCLUDE value] + AND + value2|keyword|SINGLE|EXPR
+		// 3. atomic AND value2|keyword|SINGLE|EXPR
 		atomic.toDeft()
 
 		me.pushAtomic()
 		me.pushLogicAnd()
 
-		tokens = me.scan(tks)
-	case TypeKeyWord:
-		// 0. value
-		// 1. value + keyword
-		// 2. ALL INCLUDE value + AND + keyword
-		// 3. atomic AND keyword
-		atomic.toDeft()
-
-		me.pushAtomic()
-		me.pushLogicAnd()
-
-		tokens = me.scan(tks)
-	case TypeSingle:
-		// 0. value
-		// 1. value + SINGLE
-		// 2. ALL INCLUDE value + AND + SINGLE
-		// 3. atomic AND SINGLE
-		atomic.toDeft()
-
-		me.pushAtomic()
-		me.pushLogicAnd()
-
+		// scan with value2|keyword|SINGLE|EXPR
 		tokens = me.scan(tks)
 	case TypeMulti:
-		// 0. value
-		// 1. value + SINGLE
-		// 2. ALL INCLUDE value + MULTI
-		// 3. atomic + MULTI
+		// 0. [value]
+		// 1. [value] + SINGLE
+		// 2. [ALL INCLUDE value] + MULTI
+		// 3. [atomic] + MULTI
 		atomic.toDeft()
 
 		me.pushAtomic()
 		me.pushToken(token)
-	case TypeExprRaw:
-		// 0. value
-		// 1. value + EXPR
-		// 2. ALL INCLUDE value + AND + EXPR
-		// 3. atomic AND EXPR
-		atomic.toDeft()
-
-		me.pushAtomic()
-		me.pushLogicAnd()
-
-		tokens = me.scan(tks)
 	default:
 		me.TokenPanic(token)
 	}
@@ -248,7 +216,7 @@ func (me *lex2) scanOnFsmKeyOp(tokens []*Token) []*Token {
 		// 1. keyword + op + value
 		//    push atomic
 		// 2. []
-		atomic.v = token.Value()
+		atomic.V = token.Value()
 		atomic.setFsm(aFsmOk)
 
 		me.pushAtomic()

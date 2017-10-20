@@ -1,23 +1,20 @@
 package libexpr
 
-import (
-	. "asdf"
-)
-
 func deftKeyword() *Keyword {
 	return &Keyword{
-		keyword: "__all__",
-		list:    []string{Empty},
-		scope:   ScopeAll,
+		Key: "__all__",
+		//List:  []string{Empty},
+		Scope: ScopeAll,
 	}
 }
 
 type Keyword struct {
-	keyword string
-	list    []string
-	scope   Scope
+	Key  string
+	Type int
+	//List  []string
+	Scope Scope
 }
 
 func (me *Keyword) String() string {
-	return me.keyword
+	return me.Key
 }

@@ -59,9 +59,9 @@ func (me *lex1) flushToken() {
 	}
 }
 
-func (me *lex1) flushTerm() {
+func (me *lex1) flushExpr() {
 	if Empty != me.token {
-		me.addTerm(me.token)
+		me.addExpr(me.token)
 
 		me.token = Empty
 	}
@@ -110,7 +110,7 @@ func (me *lex1) addKeyword(keyword *Keyword) {
 	})
 }
 
-func (me *lex1) addTerm(term string) {
+func (me *lex1) addExpr(term string) {
 	me.addToken(&Token{
 		t: TypeExprRaw,
 		v: term,
@@ -191,7 +191,7 @@ func (me *lex1) scan(line string) string {
 		me.flushToken()
 		me.addKeyword(v)
 
-		return line[len(v.keyword):]
+		return line[len(v.Key):]
 	} else {
 		return me.scanNormal(line)
 	}
@@ -241,7 +241,7 @@ func (me *lex1) scanTerm(line string) string {
 	}
 
 CLOSE:
-	me.flushTerm()
+	me.flushExpr()
 
 	return line
 }

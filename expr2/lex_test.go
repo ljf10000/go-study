@@ -7,11 +7,19 @@ import (
 
 func Test1(t *testing.T) {
 	for i := 1; i < 10; i++ {
-		RegisterKeyword(fmt.Sprintf("zone%d", i), ScopeZone)
+		RegisterKeyword(Keyword{
+			Key:   fmt.Sprintf("zone%d", i),
+			Scope: ScopeZone,
+			Type:  0,
+		})
 	}
 
 	for i := 1; i < 10; i++ {
-		RegisterKeyword(fmt.Sprintf("obj%d", i), ScopeObject)
+		RegisterKeyword(Keyword{
+			Key:   fmt.Sprintf("obj%d", i),
+			Scope: ScopeObject,
+			Type:  0,
+		})
 	}
 
 	lines := []string{
@@ -42,7 +50,7 @@ func Test1(t *testing.T) {
 	}
 
 	for _, line := range lines {
-		expr := Scan(line)
+		expr := LineExpr(line)
 		expr = expr
 	}
 }

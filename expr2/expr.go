@@ -46,7 +46,7 @@ func newExpr(fsm eFsm) *Expr {
 	Log.Info("create empty expr")
 	return &Expr{
 		fsm:      fsm,
-		children: []*Expr{},
+		Children: []*Expr{},
 	}
 }
 
@@ -54,8 +54,8 @@ func newAtomicExpr(atomic *Atomic) *Expr {
 	Log.Info("create atomic expr:%s", atomic)
 	return &Expr{
 		fsm:      eFsmAtomic,
-		atomic:   atomic,
-		children: []*Expr{},
+		Atomic:   atomic,
+		Children: []*Expr{},
 	}
 }
 
@@ -63,7 +63,7 @@ func newExprExpr(expr *Expr) *Expr {
 	Log.Info("create expr expr")
 	return &Expr{
 		fsm:      eFsmExpr,
-		children: []*Expr{expr},
+		Children: []*Expr{expr},
 	}
 }
 
@@ -71,16 +71,16 @@ func newExprSingleOk(expr *Expr) *Expr {
 	Log.Info("create single expr")
 	return &Expr{
 		fsm:      eFsmSingleOk,
-		logic:    LogicNot,
-		children: []*Expr{expr},
+		Logic:    LogicNot,
+		Children: []*Expr{expr},
 	}
 }
 
 func newExprMultiOk(logic Logic, a, b *Expr) *Expr {
 	return &Expr{
 		fsm:      eFsmExprOk,
-		logic:    logic,
-		children: []*Expr{a, b},
+		Logic:    logic,
+		Children: []*Expr{a, b},
 	}
 }
 
@@ -96,16 +96,16 @@ func newOrExpr(a, b *Expr) *Expr {
 
 type Expr struct {
 	fsm      eFsm
-	logic    Buildin
-	atomic   *Atomic
-	children []*Expr
+	Logic    Logic
+	Atomic   *Atomic
+	Children []*Expr
 }
 
 func (me *Expr) EString() string {
 	s := "{"
 
-	count := len(me.children)
-	for idx, v := range me.children {
+	count := len(me.Children)
+	for idx, v := range me.Children {
 		s += v.String()
 		if idx < count-1 {
 			s += ", "
@@ -118,13 +118,13 @@ func (me *Expr) EString() string {
 }
 
 func (me *Expr) String() string {
-	if me.isAtomic() {
-		return me.atomic.String()
+	if me.IsAtomic() {
+		return me.Atomic.String()
 	} else {
-		s := fmt.Sprintf("{op: %s, ", me.logic)
+		s := fmt.Sprintf("{op: %s, ", me.Logic)
 
-		count := len(me.children)
-		for idx, v := range me.children {
+		count := len(me.Children)
+		for idx, v := range me.Children {
 			s += fmt.Sprintf("%d: %s", idx, v.String())
 			if idx < count-1 {
 				s += ", "
@@ -141,24 +141,6 @@ func (me *Expr) TypeString() string {
 	return "Expr"
 }
 
-func (me *Expr) LString(level int) string {
-	s := "{" + Crlf
-
-	if me.isAtomic() {
-		s += TabN(level+1) + me.atomic.LString(level+1) + "," + Crlf
-	} else {
-		s += TabN(level+1) + fmt.Sprintf("op: %s,", me.logic) + Crlf
-
-		for idx, v := range me.children {
-			s += TabN(level+1) + fmt.Sprintf("%d: %s,", idx, me.TypeString()+v.LString(level+1)) + Crlf
-		}
-	}
-
-	s += TabN(level) + "}"
-
-	return s
-}
-
 func (me *Expr) setFsm(fsm eFsm) eFsm {
 	old := me.fsm
 	me.fsm = fsm
@@ -168,12 +150,12 @@ func (me *Expr) setFsm(fsm eFsm) eFsm {
 	return old
 }
 
-func (me *Expr) isAtomic() bool {
-	return nil != me.atomic
+func (me *Expr) pushExpr(expr *Expr) {
+	Log.Info("push expr %d==>%d", len(me.Children), len(me.Children)+1)
+
+	me.Children = append(me.Children, expr)
 }
 
-func (me *Expr) pushExpr(expr *Expr) {
-	Log.Info("push expr %d==>%d", len(me.children), len(me.children)+1)
-
-	me.children = append(me.children, expr)
+func (me *Expr) IsAtomic() bool {
+	return nil != me.Atomic
 }

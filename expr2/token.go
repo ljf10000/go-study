@@ -40,9 +40,9 @@ func (me *Token) RawString() string {
 	case TypeValue, TypeExprRaw:
 		return me.Value()
 	case TypeKeyWord:
-		return me.Keyword().keyword
+		return me.Keyword().Key
 	case TypeExprAtomic:
-		return me.expr().atomic.String()
+		return me.expr().Atomic.String()
 	default:
 		return me.Buildin().String()
 	}
@@ -81,7 +81,7 @@ func (me *Token) aexpr() *Expr {
 }
 
 func (me *Token) rexpr() *Expr {
-	return Scan(me.Value())
+	return LineExpr(me.Value())
 }
 
 func (me *Token) expr() *Expr {
