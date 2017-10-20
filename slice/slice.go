@@ -11,6 +11,58 @@ type tlv struct {
 	v int
 }
 
+func stack() {
+	sta := make([]int, 0, 100)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+
+	sta = append(sta, 1)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = append(sta, 2)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = append(sta, 3)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+
+	sta = sta[:len(sta)-1 : cap(sta)]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = sta[:len(sta)-1 : cap(sta)]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = sta[:len(sta)-1 : cap(sta)]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+}
+
+func stack2() {
+	sta := []int{}
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+
+	sta = append(sta, 1)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = append(sta, 2)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = append(sta, 3)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+
+	sta = sta[:len(sta)-1]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = sta[:len(sta)-1]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = sta[:len(sta)-1]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+
+	sta = append(sta, 1)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = append(sta, 2)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = append(sta, 3)
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+
+	sta = sta[:len(sta)-1]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = sta[:len(sta)-1]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+	sta = sta[:len(sta)-1]
+	Log.Info("len=%d cap=%d", len(sta), cap(sta))
+}
+
 func main() {
 	b := make([]tlv, 1000, 10000)
 	Log.Info("b len=%d, cap=%d", len(b), cap(b))
@@ -29,4 +81,7 @@ func main() {
 	Log.Info("t.t offset=%d size=%d", int(unsafe.Offsetof(t.t)), int(unsafe.Sizeof(t.t)))
 	Log.Info("t.l offset=%d size=%d", int(unsafe.Offsetof(t.l)), int(unsafe.Sizeof(t.l)))
 	Log.Info("t.v offset=%d size=%d", int(unsafe.Offsetof(t.v)), int(unsafe.Sizeof(t.v)))
+
+	stack()
+	stack2()
 }
