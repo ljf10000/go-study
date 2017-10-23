@@ -41,6 +41,9 @@ func Test1(t *testing.T) {
 		`a1 zone1=xxx obj1>=0`,
 		`a1 'v1 "v2"'`,
 		`a1 'v1 \"v2\"'`,
+		`a1 'v1 v2'`,
+		`a1 "v1 \\\\v2"`,
+		`a1 'v1 \\\\v2'`,
 		`a1 'v1 \"v2\"' && obj1 > 0||obj2<0`,
 		`a1 a2||(a3 obj1<0)`,
 		`a1 a2||(a3 obj1<0)&&(obj2!=0||obj3==0)`,
@@ -49,15 +52,16 @@ func Test1(t *testing.T) {
 		`a1 a2||a3 zone1="v1 \'v2\'"&&(obj1>=0&&(obj2>1||obj3<1)||!(obj4==0&&obj5==0))||(obj6<0&&obj7>0)`,
 
 		`a1 a2||
-        (a3 obj1<0)
-        &&(obj2!=0||
-        obj3==0||
-        (obj4>=0 &&
-        obj5<=0 )
-        )||
-        !
-        (obj6!= 0)
-        `,
+			        (a3 obj1<0)
+			        &&(obj2!=0||
+			        obj3==0||
+			        (obj4>=0 &&
+			        obj5<=0 )
+			        )||
+			        !
+			        (obj6!= 0)
+			        `,
+		`a1 "v1 v2"`,
 	}
 
 	for _, line := range lines {

@@ -84,4 +84,6 @@ func main() {
 
 	stack()
 	stack2()
+
+	Log.Info("nil []byte len=%d", len([]byte(nil)))
 }

@@ -2,43 +2,57 @@ package libexpr
 
 import (
 	. "asdf"
-	"strings"
 )
 
 //========================================================
-
-type escapeInfo struct {
-	s string
-	c rune
+var exprSkips = []rune{
+	CHAR_SPACE,
+	CHAR_TAB,
+	CHAR_CRLF,
 }
 
-var exprEscapes = []escapeInfo{
-	escapeInfo{
-		s: `\n`,
-		c: '\n',
-	},
-	escapeInfo{
-		s: `\t`,
-		c: '\t',
-	},
+func isSkip(c rune) bool {
+	for _, v := range exprSkips {
+		if v == c {
+			return true
+		}
+	}
+
+	return false
+}
+
+var exprEscapes = []rune{
+	't',
+	'n',
+	CHAR_SLASH,
+	CHAR_QUOT_DOUBLE,
+	CHAR_QUOT_SINGLE,
+}
+
+func isEscape(c rune) bool {
+	for _, v := range exprEscapes {
+		if c == v {
+			return true
+		}
+	}
+
+	return false
 }
 
 func hasEscapePrefix(s string) (string, rune, bool) {
-	for _, v := range exprEscapes {
-		if strings.HasPrefix(s, v.s) {
-			Log.Info("has escape prefix:%s", v.s)
+	if len(s) >= 2 && s[0] == CHAR_SLASH {
+		c := rune(s[1])
+		if isEscape(c) {
+			prefix := string(CHAR_SLASH) + string(c)
+			Log.Info("has escape prefix:%s", prefix)
 
-			return v.s, v.c, true
+			return prefix, c, true
+		} else {
+			Panic("invalid escape \\%s", string(c))
 		}
 	}
 
 	return Empty, 0, false
 }
-
-//========================================================
-
-//========================================================
-
-//========================================================
 
 //========================================================

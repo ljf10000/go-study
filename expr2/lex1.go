@@ -5,6 +5,7 @@ import (
 )
 
 const (
+	CHAR_SLASH       = '\\'
 	CHAR_QUOT_SINGLE = '\''
 	CHAR_QUOT_DOUBLE = '"'
 	CHAR_SPACE       = ' '
@@ -207,14 +208,14 @@ func (me *lex1) scan(line string) string {
 func (me *lex1) scanNormal(line string) string {
 	c, line := FirstRune(line)
 
-	switch c {
-	case CHAR_SPACE, CHAR_TAB, CHAR_CRLF:
+	switch {
+	case isSkip(c):
 		me.skipChar(c)
-	case CHAR_QUOT_SINGLE:
+	case c == CHAR_QUOT_SINGLE:
 		line = me.scanQuot(c, line, true, me.singleQuot)
-	case CHAR_QUOT_DOUBLE:
+	case c == CHAR_QUOT_DOUBLE:
 		line = me.scanQuot(c, line, true, me.doubleQuot)
-	case CHAR_LP:
+	case c == CHAR_LP:
 		line = me.scanTerm(line)
 	default:
 		me.addChar(c)
@@ -284,15 +285,26 @@ func (me *lex1) singleQuot(line string, strict bool) (bool, string) {
 }
 
 func (me *lex1) doubleQuot(line string, strict bool) (bool, string) {
-	return me.singleQuot(me.escape(line), strict)
-}
+	var c rune
 
-func (me *lex1) escape(line string) string {
-	if s, c, ok := hasEscapePrefix(line); ok {
+	c, line = FirstRune(line)
+	switch c {
+	case me.quot:
+		return true, line
+	case CHAR_SLASH:
+		c, line = FirstRune(line)
+		if isEscape(c) {
+			me.addChar(c)
+
+			Log.Info("has escape prefix:%s", string(CHAR_SLASH)+string(c))
+		} else {
+			Panic("invalid escape \\%s", string(c))
+		}
+
+		return false, line
+	default:
 		me.addChar(c)
 
-		line = line[len(s):]
+		return false, line
 	}
-
-	return line
 }
