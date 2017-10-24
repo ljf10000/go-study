@@ -6,11 +6,15 @@ import (
 	"testing"
 )
 
-func newmember(id, father MemberID) *Member {
+func newmember(id, father string) *Member {
 	return &Member{
 		ID:       id,
 		FatherID: father,
 	}
+}
+
+func newmembers(members []*Member, root int) []*Member {
+
 }
 
 func Test1(t *testing.T) {
