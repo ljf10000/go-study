@@ -85,5 +85,14 @@ func main() {
 	stack()
 	stack2()
 
-	Log.Info("nil []byte len=%d", len([]byte(nil)))
+	x := []byte(nil)
+	y := []byte{}
+	z := []byte{0}
+	copy(x, y) // empty==>nil
+	copy(y, x) // nil==>empty
+	copy(z, x) // nil==>bin
+	copy(z, y) // empty==>bin
+
+	Log.Info("nil []byte len=%d", len(x))
+	Log.Info("empty []byte len=%d", len(y))
 }
