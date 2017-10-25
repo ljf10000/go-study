@@ -2,6 +2,7 @@ package main
 
 import (
 	. "asdf"
+	"testing"
 	"unsafe"
 )
 
@@ -63,7 +64,7 @@ func stack2() {
 	Log.Info("len=%d cap=%d", len(sta), cap(sta))
 }
 
-func main() {
+func Test1(t *testing.T) {
 	b := make([]tlv, 1000, 10000)
 	Log.Info("b len=%d, cap=%d", len(b), cap(b))
 

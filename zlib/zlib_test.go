@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"testing"
 )
 
 func ExampleNewWriter() {
@@ -36,7 +37,7 @@ func ExampleNewReader() {
 	r.Close()
 }
 
-func main() {
+func Test1(t *testing.T) {
 	ExampleNewWriter()
 	ExampleNewReader()
 }

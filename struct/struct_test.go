@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"testing"
 )
 
-type IShow interface{
+type IShow interface {
 	Show()
 }
 
@@ -20,14 +21,14 @@ func (me *head) Show() {
 
 type body struct {
 	head
-	
+
 	b1 int
 	b2 int
 }
 
 func (me *body) Show() {
 	me.head.Show()
-	
+
 	fmt.Println("body's b1=", me.b1)
 	fmt.Println("body's b2=", me.b2)
 }
@@ -37,16 +38,15 @@ type msg struct {
 	s string
 }
 
-func main() {
+func Test1(t *testing.T) {
 	var b body
 	b.h1 = 10
 	b.h2 = 11
 	b.b1 = 100
 	b.b2 = 101
-	
-	
+
 	b.Show()
-	
-	msg := &msg{n:2, s:"sb"}
+
+	msg := &msg{n: 2, s: "sb"}
 	fmt.Println(msg)
 }

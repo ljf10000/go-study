@@ -7,6 +7,7 @@ import (
 	"encoding/asn1"
 	"encoding/hex"
 	"os"
+	"testing"
 )
 
 type Cert struct {
@@ -176,7 +177,7 @@ func show(c *x509.Certificate) {
 	*/
 }
 
-func main() {
+func Test1(t *testing.T) {
 	for key, certs := range vendors {
 		for idx, cert := range certs {
 			Log.Info("========================================")

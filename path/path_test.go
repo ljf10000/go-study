@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
-func main() {
+func Test1(t *testing.T) {
 	filepath.Walk("D:\\code\\lang\\go\\gopath\\src", func(path string, f os.FileInfo, err error) error {
 		if nil == f {
 			return err

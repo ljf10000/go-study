@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"testing"
 )
 
 const BUFSIZE = 128
@@ -55,7 +56,7 @@ const SERVER = 128
 var GCH [SERVER]chan *cMessage
 var count = 0
 
-func main() {
+func Test1(t *testing.T) {
 	for i := 0; i < SERVER; i++ {
 		GCH[i] = make(chan *cMessage, COUNT)
 	}

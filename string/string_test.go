@@ -4,9 +4,10 @@ package main
 import (
 	"fmt"
 	"strings"
+	"testing"
 )
 
-func main() {
+func Test1(t *testing.T) {
 	var s string
 
 	s = `I Like the "the\t \"傻逼\" book"`

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"net"
+	"testing"
 
 	. "asdf"
 )

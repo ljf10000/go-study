@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"testing"
 )
 
 func master(v int) (func() int, func(int)) {
@@ -15,7 +16,7 @@ func master(v int) (func() int, func(int)) {
 		}
 }
 
-func main() {
+func Test1(t *testing.T) {
 	get, set := master(5)
 
 	fmt.Println("get", get())

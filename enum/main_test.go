@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"testing"
 )
 
 type ETest int
@@ -20,7 +21,7 @@ func (me ETest) String() string {
 	return "ETest String"
 }
 
-func main() {
+func Test1(t *testing.T) {
 	fmt.Println(ETa)
 	fmt.Println(ETb)
 	fmt.Println(ETc.ToString())

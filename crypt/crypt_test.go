@@ -4,12 +4,13 @@ import (
 	. "asdf"
 	"encoding/hex"
 	"fmt"
+	"testing"
 )
 
 var plaintext = []byte("0123456789abcdef")
 var key = "0123456789abcdef0123456789ABCDEF"
 
-func main() {
+func Test1(t *testing.T) {
 	crypt := CryptCreate(0, 0, []byte(key))
 
 	ciphertext := make([]byte, len(plaintext))
