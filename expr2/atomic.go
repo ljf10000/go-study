@@ -64,7 +64,7 @@ func (me *Atomic) setFsm(fsm aFsm) aFsm {
 	return old
 }
 
-func (me *Atomic) upKey() *Atomic {
+func (me *Atomic) kDefault() *Atomic {
 	me.V = me.K.Key
 	me.K = deftKeyword()
 	me.Op = OpInclude
@@ -73,7 +73,7 @@ func (me *Atomic) upKey() *Atomic {
 	return me
 }
 
-func (me *Atomic) upValue() *Atomic {
+func (me *Atomic) vDefault() *Atomic {
 	me.K = deftKeyword()
 	me.Op = OpInclude
 	me.setFsm(aFsmOk)
