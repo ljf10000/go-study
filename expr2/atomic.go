@@ -64,11 +64,16 @@ func (me *Atomic) setFsm(fsm aFsm) aFsm {
 	return old
 }
 
-func (me *Atomic) toDeft() *Atomic {
-	if aFsmValue != me.fsm {
-		Panic("cannot convert fsm[%s] to deft", me.fsm)
-	}
+func (me *Atomic) keyToDeft() *Atomic {
+	me.V = me.K.Key
+	me.K = deftKeyword()
+	me.Op = OpInclude
+	me.setFsm(aFsmOk)
 
+	return me
+}
+
+func (me *Atomic) valueToDeft() *Atomic {
 	me.K = deftKeyword()
 	me.Op = OpInclude
 	me.setFsm(aFsmOk)

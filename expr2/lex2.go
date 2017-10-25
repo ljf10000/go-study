@@ -73,11 +73,14 @@ func (me *lex2) stop() {
 	atomic := me.atomic
 
 	switch atomic.fsm {
+	case aFsmKey:
+		atomic.keyToDeft()
+		me.pushAtomic()
 	case aFsmValue:
-		atomic.toDeft()
+		atomic.valueToDeft()
 		me.pushAtomic()
 	case aFsmInit:
-		DoNothing()
+		// do nothing
 	default:
 		Panic("left fsm[%s]", atomic.fsm)
 	}
@@ -152,9 +155,8 @@ func (me *lex2) scanOnFsmInit(tokens []*Token) []*Token {
 	return tokens
 }
 
-func (me *lex2) scanOnFsmKey(tokens []*Token) []*Token {
-	var token *Token
-	token, tokens = pickFirstToken(tokens)
+func (me *lex2) scanOnFsmKey(tks []*Token) []*Token {
+	token, tokens := pickFirstToken(tks)
 
 	atomic := me.atomic
 
@@ -168,12 +170,36 @@ func (me *lex2) scanOnFsmKey(tokens []*Token) []*Token {
 		atomic.setFsm(aFsmKeyOp)
 
 		atomic.K.checkOp(op)
+	case TypeValue, TypeKeyWord, TypeSingle, TypeExprRaw:
+		// 0. [keyword]
+		// 1. [keyword] + value|keyword|SINGLE|EXPR
+		// 2. [keyword as value] + value|keyword|SINGLE|EXPR
+		// 3. [ALL INCLUDE value] + AND + value|keyword|SINGLE|EXPR
+		// 4. atomic AND value|keyword|SINGLE|EXPR
+		atomic.keyToDeft()
+
+		me.pushAtomic()
+		me.pushLogicAnd()
+
+		// scan with value2|keyword|SINGLE|EXPR
+		tokens = me.scan(tks)
+	case TypeMulti:
+		// 0. [keyword]
+		// 1. [keyword] + MULTI
+		// 2. [keyword as value] + MULTI
+		// 3. [ALL INCLUDE value] + MULTI
+		// 4. [atomic] + MULTI
+		atomic.keyToDeft()
+
+		me.pushAtomic()
+		me.pushToken(token)
 	default:
 		me.TokenPanic(token)
 	}
 
 	return tokens
 }
+
 func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 	token, tokens := pickFirstToken(tks)
 
@@ -185,7 +211,7 @@ func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 		// 1. [value] + value2|keyword|SINGLE|EXPR
 		// 2. [ALL INCLUDE value] + AND + value2|keyword|SINGLE|EXPR
 		// 3. atomic AND value2|keyword|SINGLE|EXPR
-		atomic.toDeft()
+		atomic.valueToDeft()
 
 		me.pushAtomic()
 		me.pushLogicAnd()
@@ -194,10 +220,10 @@ func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 		tokens = me.scan(tks)
 	case TypeMulti:
 		// 0. [value]
-		// 1. [value] + SINGLE
+		// 1. [value] + MULTI
 		// 2. [ALL INCLUDE value] + MULTI
 		// 3. [atomic] + MULTI
-		atomic.toDeft()
+		atomic.valueToDeft()
 
 		me.pushAtomic()
 		me.pushToken(token)
