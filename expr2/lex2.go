@@ -162,8 +162,12 @@ func (me *lex2) scanOnFsmKey(tokens []*Token) []*Token {
 	case TypeOperator:
 		// 0. keyword
 		// 1. keyword + op
-		atomic.Op = token.Op()
+		op := token.Op()
+
+		atomic.Op = op
 		atomic.setFsm(aFsmKeyOp)
+
+		atomic.K.checkOp(op)
 	default:
 		me.TokenPanic(token)
 	}
