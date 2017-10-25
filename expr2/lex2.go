@@ -181,7 +181,7 @@ func (me *lex2) scanOnFsmKey(tks []*Token) []*Token {
 		me.pushAtomic()
 		me.pushLogicAnd()
 
-		// scan with value2|keyword|SINGLE|EXPR
+		// re-scan with value2|keyword|SINGLE|EXPR
 		tokens = me.scan(tks)
 	case TypeMulti:
 		// 0. [keyword]
@@ -216,7 +216,7 @@ func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 		me.pushAtomic()
 		me.pushLogicAnd()
 
-		// scan with value2|keyword|SINGLE|EXPR
+		// re-scan with value2|keyword|SINGLE|EXPR
 		tokens = me.scan(tks)
 	case TypeMulti:
 		// 0. [value]
