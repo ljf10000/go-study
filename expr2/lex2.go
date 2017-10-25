@@ -74,10 +74,10 @@ func (me *lex2) stop() {
 
 	switch atomic.fsm {
 	case aFsmKey:
-		atomic.keyToDeft()
+		atomic.upKey()
 		me.pushAtomic()
 	case aFsmValue:
-		atomic.valueToDeft()
+		atomic.upValue()
 		me.pushAtomic()
 	case aFsmInit:
 		// do nothing
@@ -176,7 +176,7 @@ func (me *lex2) scanOnFsmKey(tks []*Token) []*Token {
 		// 2. [keyword as value] + value|keyword|SINGLE|EXPR
 		// 3. [ALL INCLUDE value] + AND + value|keyword|SINGLE|EXPR
 		// 4. atomic AND value|keyword|SINGLE|EXPR
-		atomic.keyToDeft()
+		atomic.upKey()
 
 		me.pushAtomic()
 		me.pushLogicAnd()
@@ -189,7 +189,7 @@ func (me *lex2) scanOnFsmKey(tks []*Token) []*Token {
 		// 2. [keyword as value] + MULTI
 		// 3. [ALL INCLUDE value] + MULTI
 		// 4. [atomic] + MULTI
-		atomic.keyToDeft()
+		atomic.upKey()
 
 		me.pushAtomic()
 		me.pushToken(token)
@@ -211,7 +211,7 @@ func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 		// 1. [value] + value2|keyword|SINGLE|EXPR
 		// 2. [ALL INCLUDE value] + AND + value2|keyword|SINGLE|EXPR
 		// 3. atomic AND value2|keyword|SINGLE|EXPR
-		atomic.valueToDeft()
+		atomic.upValue()
 
 		me.pushAtomic()
 		me.pushLogicAnd()
@@ -223,7 +223,7 @@ func (me *lex2) scanOnFsmValue(tks []*Token) []*Token {
 		// 1. [value] + MULTI
 		// 2. [ALL INCLUDE value] + MULTI
 		// 3. [atomic] + MULTI
-		atomic.valueToDeft()
+		atomic.upValue()
 
 		me.pushAtomic()
 		me.pushToken(token)
