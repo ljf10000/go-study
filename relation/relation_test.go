@@ -14,7 +14,7 @@ func newmember(id, father string) *Member {
 }
 
 func newmembers(members []*Member, root int) []*Member {
-
+	return nil
 }
 
 func Test1(t *testing.T) {
@@ -55,6 +55,7 @@ func Test1(t *testing.T) {
 	r := &Relation{}
 
 	r.MultiInsert(members)
+	r.Build()
 
 	b, err := json.MarshalIndent(r.Get("001"), "", "    ")
 	if nil != err {

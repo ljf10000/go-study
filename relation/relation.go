@@ -15,7 +15,9 @@ type Member struct {
 type Relation map[string]*Member
 
 func (me Relation) Get(id string) *Member {
-	if v, ok := me[id]; ok {
+	if "" == id {
+		return nil
+	} else if v, ok := me[id]; ok {
 		return v
 	} else {
 		return nil
@@ -25,17 +27,15 @@ func (me Relation) Get(id string) *Member {
 func (me Relation) Insert(member *Member) error {
 	id := member.ID
 
-	if nil != me.Get(id) {
+	if "" == id {
+		return errors.New("empty id")
+	} else if nil != me.Get(id) {
 		return errors.New(fmt.Sprintf("%s exist", id))
-	} else if "" != member.FatherID {
-		if father := me.Get(member.FatherID); nil != father {
-			father.Children = append(father.Children, member)
-		}
+	} else {
+		me[id] = member
+
+		return nil
 	}
-
-	me[id] = member
-
-	return nil
 }
 
 func (me Relation) MultiInsert(members []*Member) error {
@@ -46,4 +46,13 @@ func (me Relation) MultiInsert(members []*Member) error {
 	}
 
 	return nil
+}
+
+func (me Relation) Build() {
+	for _, member := range me {
+		father := me.Get(member.FatherID)
+		if nil != father {
+			father.Children = append(father.Children, member)
+		}
+	}
 }
