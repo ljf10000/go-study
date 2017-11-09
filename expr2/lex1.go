@@ -260,14 +260,17 @@ func (me *lex1) scanQuot(quot rune, line string, strict bool, scan funcLineLexSc
 	closed := false
 	me.openQuot(quot, strict)
 
-	for {
+	for len(line) > 0 {
 		closed, line = scan(line, strict)
 		if closed {
 			break
 		}
 	}
 
-	me.closeQuot(strict)
+	if closed {
+		me.closeQuot(strict)
+	}
+
 	return line
 }
 
