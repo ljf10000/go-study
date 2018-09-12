@@ -57,17 +57,19 @@ var GCH [SERVER]chan *cMessage
 var count = 0
 
 func Test1(t *testing.T) {
-	for i := 0; i < SERVER; i++ {
-		GCH[i] = make(chan *cMessage, COUNT)
-	}
+	/*
+		for i := 0; i < SERVER; i++ {
+			GCH[i] = make(chan *cMessage, COUNT)
+		}
 
-	for i := 0; i < SERVER*COUNT; i++ {
-		go client(GCH[i%SERVER])
-	}
+		for i := 0; i < SERVER*COUNT; i++ {
+			go client(GCH[i%SERVER])
+		}
 
-	for i := 0; i < SERVER-1; i++ {
-		go server(GCH[i])
-	}
+		for i := 0; i < SERVER-1; i++ {
+			go server(GCH[i])
+		}
 
-	server(GCH[SERVER-1])
+		server(GCH[SERVER-1])
+	*/
 }

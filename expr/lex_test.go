@@ -63,6 +63,7 @@ func Test1(t *testing.T) {
 				        `,
 		`a1 "v1 v2"`,
 		`a1 obj1 obj2 || obj3 obj4 obj5`,
+		`obj1==中国`,
 	}
 
 	for _, line := range lines {

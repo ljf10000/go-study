@@ -5,11 +5,15 @@ import (
 	"encoding/gob"
 	//	. "asdf"
 	. "asdf"
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	//	. "libhello"
 	"testing"
+
+	"github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const jperson = `{
 	"name":"sb",
@@ -64,7 +68,7 @@ type company2 struct {
 }
 
 type myJson struct {
-	//company
+	company
 
 	//Company []*company
 	//Friend  map[string]string
@@ -73,7 +77,7 @@ type myJson struct {
 	Live bool
 }
 
-func main() {
+func Test1(t *testing.T) {
 	fmt.Println("jperson", jperson)
 
 	my := &myJson{}
@@ -145,4 +149,63 @@ func main() {
 	dec := gob.NewDecoder(&bin)
 	dec.Decode(companys2)
 	Log.Info("after gob decode, companys2:%v", companys2)
+}
+
+type InfoA struct {
+	A string
+}
+
+type InfoB struct {
+	B string
+}
+
+type Info struct {
+	InfoA
+	InfoB
+	C string
+}
+
+func Test2(t *testing.T) {
+	v1 := &Info{
+		InfoA: InfoA{
+			A: "A",
+		},
+		InfoB: InfoB{
+			B: "B",
+		},
+		C: "C",
+	}
+
+	b1, _ := json.Marshal(v1)
+	fmt.Printf("obj==>json: %s\n", string(b1))
+
+	v2 := &Info{}
+	json.Unmarshal(b1, v2)
+	fmt.Printf("json==>obj: %x\n", v2)
+
+	b2, _ := json.Marshal(v2)
+	fmt.Printf("obj==>json: %s\n", string(b2))
+
+	v3 := map[uint32]string{
+		1: "s1",
+		2: "s2",
+		3: "s3",
+	}
+
+	b3, _ := json.Marshal(v3)
+	fmt.Printf("map==>json: %s\n", string(b3))
+
+	v4 := map[uint32]string{}
+
+	json.Unmarshal(b3, &v4)
+	fmt.Printf("json==>map: %v\n", v4)
+
+	v5 := map[int][]byte{
+		1: []byte("111"),
+		2: []byte("222"),
+		3: []byte("333"),
+	}
+
+	b5, _ := json.Marshal(v5)
+	fmt.Printf("map==>json: %s\n", string(b5))
 }
