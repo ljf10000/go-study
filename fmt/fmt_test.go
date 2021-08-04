@@ -68,7 +68,7 @@ func Test5(t *testing.T) {
 	var e interface{}
 	var f = c
 
-	fmt.Println("a=", a, "b=", b, "c=", c, "d=", d, "e=", e, "f=", f)
+	// fmt.Println("a=", a, "b=", b, "c=", c, "d=", d, "e=", e, "f=", f)
 
 	test5_helper(t, "a", a)
 	test5_helper(t, "b", b)
@@ -76,4 +76,28 @@ func Test5(t *testing.T) {
 	test5_helper(t, "d", d)
 	test5_helper(t, "e", e)
 	test5_helper(t, "f", f)
+
+	fmt.Printf("%-10s: %d\n", "12345", 12345)
+}
+
+func Test6(t *testing.T) {
+	var s1, s2, s3, s4 string
+	var v int
+
+	fmt.Sscanf("192.168.1.1", "%s.%s.%s.%s", &s1, &s2, &s3, &s4)
+	fmt.Printf("s1=%s, s2=%s, s3=%s, s4=%s\n", s1, s2, s3, s4)
+
+	fmt.Sscanf("192.168.1.1/24", "%s/%d", &s1, &v)
+	fmt.Printf("s1=%s, v=%d\n", s1, v)
+
+	fmt.Sscanf("192.168.1.1-192.168.1.1", "%s-%s", &s1, &s2)
+	fmt.Printf("s1=%s, s2=%s\n", s1, s2)
+
+	fmt.Sscanf("192.168.1.1 192.168.1.1", "%s %s", &s1, &s2)
+	fmt.Printf("s1=%s, s2=%s\n", s1, s2)
+
+	var b1, b2, b3, b4 byte
+
+	fmt.Sscanf("192.168.1.1", "%d.%d.%d.%d", &b1, &b2, &b3, &b4)
+	fmt.Printf("b1=%d, b2=%d, b3=%d, b4=%d\n", b1, b2, b3, b4)
 }

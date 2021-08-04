@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+
 	//	. "asdf"
 	. "asdf"
 	// "encoding/json"
@@ -71,7 +72,7 @@ type myJson struct {
 	company
 
 	//Company []*company
-	//Friend  map[string]string
+	Friend map[string]string
 	//Like    string
 	//Error error
 	Live bool

@@ -38,6 +38,14 @@ type msg struct {
 	s string
 }
 
+func (me *msg) set1() {
+	me.n = 1
+}
+
+func (me msg) set2() {
+	me.n = 2
+}
+
 func Test1(t *testing.T) {
 	var b body
 	b.h1 = 10
@@ -47,6 +55,12 @@ func Test1(t *testing.T) {
 
 	b.Show()
 
-	msg := &msg{n: 2, s: "sb"}
-	fmt.Println(msg)
+	msg := msg{n: 0, s: "sb"}
+	t.Log(msg)
+
+	(&msg).set1()
+	t.Log(msg)
+
+	msg.set2()
+	t.Log(msg)
 }

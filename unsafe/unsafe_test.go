@@ -1,7 +1,9 @@
 package array
 
 import (
+	. "asdf"
 	"fmt"
+	"reflect"
 	"testing"
 	"unsafe"
 )
@@ -108,4 +110,91 @@ func TestStruct(t *testing.T) {
 	fmt.Printf("sizeof(p4)=%d\n", unsafe.Sizeof(p4))
 	fmt.Printf("sizeof(p5)=%d\n", unsafe.Sizeof(p5))
 	fmt.Printf("sizeof(p6)=%d\n", unsafe.Sizeof(p6))
+}
+
+type StringHeader struct {
+	Data uintptr
+	Size int
+}
+
+type _Empty struct{}
+
+type _NotAlign struct {
+	a uint32
+	b byte
+	c uint32
+	e uint16
+	f uint64
+}
+
+type small_1 struct {
+	a byte
+	b byte
+	c byte
+}
+
+type small_2 struct {
+	a uint16
+	b byte
+}
+
+type small_3 struct {
+	a byte
+	b uint16
+}
+
+func TestString(t *testing.T) {
+	s := "0123456789"
+	h := (*StringHeader)(unsafe.Pointer(&s))
+	b := StructSliceEx(h.Data, h.Size)
+
+	b2 := []byte(s)
+	h2 := (*reflect.SliceHeader)(unsafe.Pointer(&b2))
+
+	s3 := string(b2)
+	h3 := (*StringHeader)(unsafe.Pointer(&s3))
+
+	fmt.Printf("sizeof(s)=%d\n", unsafe.Sizeof(s))
+	fmt.Printf("slice(s)=%v\n", b)
+
+	fmt.Printf("h data=0x%x, size=%d\n", h.Data, h.Size)
+	fmt.Printf("h2 data=0x%x, size=%d\n", h2.Data, h2.Len)
+	fmt.Printf("h3 data=0x%x, size=%d\n", h3.Data, h3.Size)
+
+	empty := _Empty{}
+	pEmpty := &_Empty{}
+	fmt.Printf("empty size=%d %d %d %d\n",
+		unsafe.Sizeof(&empty),
+		unsafe.Sizeof(empty),
+		unsafe.Sizeof(pEmpty),
+		unsafe.Sizeof(*pEmpty))
+
+	var vi interface{}
+
+	fmt.Printf("interface size=%d %d\n",
+		unsafe.Sizeof(&vi),
+		unsafe.Sizeof(vi))
+
+	bb := true
+	fmt.Printf("bool size=%d %d\n",
+		unsafe.Sizeof(bb),
+		unsafe.Sizeof(false))
+
+	na := _NotAlign{}
+	pNA := &na
+
+	fmt.Printf("not-align size=%d %d %d %d\n",
+		unsafe.Sizeof(&na),
+		unsafe.Sizeof(na),
+		unsafe.Sizeof(pNA),
+		unsafe.Sizeof(*pNA))
+
+	sm1 := small_1{}
+	sm2 := small_2{}
+	sm3 := small_3{}
+
+	fmt.Printf("sm1=%d sm2=%d sm3=%d\n",
+		unsafe.Sizeof(sm1),
+		unsafe.Sizeof(sm2),
+		unsafe.Sizeof(sm3))
 }
