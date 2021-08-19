@@ -30,10 +30,9 @@ func (me *rwbuffer) Slice() []byte {
 	return me.body[:me.size]
 }
 
-var reader = rwbuffer{}
-var writer = rwbuffer{}
-
 func write_all() {
+	writer := rwbuffer{}
+
 	for i := 0; i < MAX_SIZE; i++ {
 		writer.body[i] = 0xff
 	}
@@ -51,6 +50,8 @@ func write_all() {
 }
 
 func read_all() {
+	reader := rwbuffer{}
+
 	for i := 0; i < len(config); i++ {
 		for j := uint32(0); j < config[i].Count; j++ {
 			idx := MpArrayIndex{Array: uint32(i), Entry: j}
